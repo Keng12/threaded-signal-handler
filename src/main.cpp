@@ -10,8 +10,15 @@
 void sighand1(std::shared_ptr<std::atomic_bool> quit, const int signal)
 {
     static int count = 1;
-    std::cout << "Caught signal " << signal << " " << count << " time(s)." << std::endl;
-    ++count;
+    if (signal == SIGINT)
+    {
+        std::cout << "Caught signal " << signal << " " << count << " time(s)." << std::endl;
+        ++count;
+    }
+    else
+    {
+        std::cout << "Caught unknown signal" << std::endl;
+    }
     if (count % 3 == 0)
     {
         *quit = true;
