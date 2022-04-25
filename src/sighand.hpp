@@ -21,10 +21,10 @@ namespace sth
     int init_mask(sigset_t *set_ptr);
     int add_sig(sigset_t *set_ptr, const int signal);
 
-    int handle_signal(std::shared_ptr<std::atomic_int> result, const std::shared_ptr<std::atomic_bool> quit, std::unordered_map<int, std::function<void()>> map_func, std::thread &thread);
-    int handle_signal(int signal, std::shared_ptr<std::atomic_int> result, const std::shared_ptr<std::atomic_bool> quit, std::function<void()> sig_func, std::thread &thread);
+    int handle_signal(std::thread &thread, std::shared_ptr<std::atomic_int> result, const std::shared_ptr<std::atomic_bool> quit, std::unordered_map<int, std::function<void()>> map_func);
+    int handle_signal(std::thread &thread, std::shared_ptr<std::atomic_int> result, const std::shared_ptr<std::atomic_bool> quit, int signal, std::function<void()> sig_func);
     template <size_t n_signal>
-    int inline handle_signal(std::array<int, n_signal> signal_array, std::shared_ptr<std::atomic_int> result, std::shared_ptr<std::atomic_bool> quit, std::function<void(int)> sig_func, std::thread &thread)
+    int inline handle_signal(std::thread &thread, std::shared_ptr<std::atomic_int> result, std::shared_ptr<std::atomic_bool> quit, std::array<int, n_signal> signal_array, std::function<void(int)> sig_func)
     {
         sigset_t set{};
         int exit_code = init_mask(&set);

@@ -50,12 +50,12 @@ int main()
     std::array<int, 1> sig_array{};
     sig_array[0] = SIGINT;
     std::thread t1{};
-    sth::handle_signal(result, quit, map_func, t1);
+    sth::handle_signal(t1, result, quit, map_func);
     t1.join();
     *quit = false;
-    sth::handle_signal(SIGINT, result, quit, f2, t1);
+    sth::handle_signal(t1, result, quit, SIGINT, f2);
     t1.join();
     *quit = false;
-    sth::handle_signal(sigarray, result, quit, f1, t1);
+    sth::handle_signal(t1, result, quit, sigarray, f1);
     t1.join();
 }

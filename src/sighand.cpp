@@ -50,7 +50,7 @@ namespace sth
         }
         return result_sig;
     }
-    
+
     int add_sig(sigset_t *set_ptr, const int signal)
     {
         int result_sig = sigaddset(set_ptr, signal);
@@ -61,7 +61,7 @@ namespace sth
         return result_sig;
     }
 
-    int handle_signal(std::shared_ptr<std::atomic_int> result, const std::shared_ptr<std::atomic_bool> quit, std::unordered_map<int, std::function<void()>> map_func, std::thread &thread)
+    int handle_signal(std::thread &thread, std::shared_ptr<std::atomic_int> result, const std::shared_ptr<std::atomic_bool> quit, std::unordered_map<int, std::function<void()>> map_func)
     {
         sigset_t set{};
         int exit_code = init_mask(&set);
@@ -85,7 +85,7 @@ namespace sth
         return exit_code;
     }
 
-    int handle_signal(int signal, std::shared_ptr<std::atomic_int> result, const std::shared_ptr<std::atomic_bool> quit, std::function<void()> sig_func, std::thread &thread)
+    int handle_signal(std::thread &thread, std::shared_ptr<std::atomic_int> result, const std::shared_ptr<std::atomic_bool> quit, int signal, std::function<void()> sig_func)
     {
         sigset_t set{};
         int exit_code = init_mask(&set);
