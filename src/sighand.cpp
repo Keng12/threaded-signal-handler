@@ -20,7 +20,7 @@ namespace sth
         while (!(*quit))
         {
             int sig{};
-            sigwait(&set, &sig);
+            *result = sigwait(&set, &sig);
             if (0 == *result)
             {
                 sig_func();
