@@ -7,10 +7,21 @@
 #include <functional>
 #include <unordered_map>
 
-void sighand(std::shared_ptr<std::atomic_bool> quit)
+void sighand1(std::shared_ptr<std::atomic_bool> quit, const int signal)
 {
-    static int count = 0;
-    std::cout << "Caught signal" << count << std::endl;
+    static int count = 1;
+    std::cout << "Caught signal " << signal << " " << count << " time(s)." << std::endl;
+    ++count;
+    if (count % 3 == 0)
+    {
+        *quit = true;
+    }
+}
+
+void sighand2(std::shared_ptr<std::atomic_bool> quit)
+{
+    static int count = 1;
+    std::cout << "Caught SIGINT " << count << " time(s)." << std::endl;
     ++count;
     if (count % 3 == 0)
     {
@@ -25,29 +36,19 @@ int main()
     std::array<int, 1> sigarray{};
     sigarray[0] = SIGINT;
     sigset_t set{};
-    *quit;
-    auto f = std::bind(sighand, quit);
-    std::unordered_map<int, std::function<void()>> map_func{{SIGINT, f}};
+    using namespace std::placeholders;
+    auto f1 = std::bind(sighand1, quit, _1);
+    auto f2 = std::bind(sighand2, quit);
+    std::unordered_map<int, std::function<void()>> map_func{{SIGINT, f2}};
     std::array<int, 1> sig_array{};
     sig_array[0] = SIGINT;
     std::thread t1{};
     sth::handle_signal(result, quit, map_func, t1);
-    while (!(*quit))
-    {
-        t1.join();
-    }
-    std::cout << "Quit after joining" << std::endl;
+    t1.join();
     *quit = false;
-    sth::handle_signal(SIGINT, result, quit, f, t1);
-    while (!(*quit))
-    {
-        t1.join();
-    }
-    std::cout << "Quit after joining" << std::endl;
+    sth::handle_signal(SIGINT, result, quit, f2, t1);
+    t1.join();
     *quit = false;
-    sth::handle_signal(sigarray, result, quit, f, t1);
-    while (!(*quit))
-    {
-        t1.join();
-    }
+    sth::handle_signal(sigarray, result, quit, f1, t1);
+    t1.join();
 }
