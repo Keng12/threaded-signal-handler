@@ -105,7 +105,7 @@ namespace sth
         return exit_code;
     }
 
-    template <size_t n_signal>
+    template <size_t n_signal> inline
     int handle_signal(std::array<int, n_signal> signal_array, std::shared_ptr<std::atomic_int> result, std::shared_ptr<std::atomic_bool> quit, std::function<void()> sig_func, std::thread &thread)
     {
         sigset_t set{};
