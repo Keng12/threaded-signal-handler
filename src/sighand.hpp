@@ -21,8 +21,8 @@ namespace sth
     int handle_signal(std::shared_ptr<std::atomic_int> result, const std::shared_ptr<std::atomic_bool> quit, std::unordered_map<int, std::function<void()>> map_func, std::thread &thread);
     int handle_signal(int signal, std::shared_ptr<std::atomic_int> result, const std::shared_ptr<std::atomic_bool> quit, std::function<void()> sig_func, std::thread &thread);
 
-    template <size_t n_signal> inline
-    int  handle_signal(std::array<int, n_signal> signal_array, std::shared_ptr<std::atomic_int> result, std::shared_ptr<std::atomic_bool> quit, std::function<void()> sig_func, std::thread &thread)
+    template <size_t n_signal>
+    int inline handle_signal(std::array<int, n_signal> signal_array, std::shared_ptr<std::atomic_int> result, std::shared_ptr<std::atomic_bool> quit, std::function<void()> sig_func, std::thread &thread)
     {
         sigset_t set{};
         int exit_code = init_mask(&set);
