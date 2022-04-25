@@ -1,4 +1,4 @@
-#include "../include/sighand.hpp"
+#include "sighand.hpp"
 
 #include <iostream>
 #include <thread>
