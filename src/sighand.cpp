@@ -113,9 +113,9 @@ namespace sth
         if (mRunning)
         {
             int result = pthread_cancel(mThread);
-            assert(result == 0);
+            assert(0 == result);
             result = pthread_join(mThread, nullptr);
-            assert(result == 0);
+            assert(0 == result);
 
         }
     }
