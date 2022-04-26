@@ -128,9 +128,6 @@ namespace sth
 
     Thread::~Thread()
     {
-        if (mRunning)
-        {
-            join();
-        }
+        join();
     }
 }
