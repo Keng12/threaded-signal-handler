@@ -14,23 +14,19 @@ namespace sth
             {
                 if (args->F_w_args)
                 {
-                    std::cout<<"args fun" << std::endl;
                     args->F_w_args(sig);
                 }
                 else if (args->F)
                 {
-                    std::cout<<"fun" << std::endl;
                     args->F();
                 }
                 else
                 {
-                    std::cout<<"Map fun" << std::endl;
                     args->map_F[sig]();
                 }
             }
             else
             {
-                std::cout<<"Fail"<<std::endl;
                 quit = true;
             }
         }
