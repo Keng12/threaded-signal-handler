@@ -49,13 +49,30 @@ int main()
     std::unordered_map<int, std::function<void()>> map_func{{SIGINT, f2}};
     std::array<int, 1> sig_array{};
     sig_array[0] = SIGINT;
-    std::thread t1{};
-    sth::handle_signal(t1, result, quit, map_func);
-    t1.join();
+    int exit_code{};
+    {
+        sth::Thread t = sth::Thread(exit_code, result, SIGINT, f2);
+        while (!*quit)
+        {
+        }
+    }
+    // sth::Thread t = sth::Thread(exit_code, result, map_func);
     *quit = false;
-    sth::handle_signal(t1, result, quit, SIGINT, f2);
-    t1.join();
+    {
+        sth::Thread t = sth::Thread(exit_code, result, sigarray, f1);
+        while (!*quit)
+        {
+        }
+    }
     *quit = false;
-    sth::handle_signal(t1, result, quit, sigarray, f1);
-    t1.join();
+    {
+        sth::Thread t = sth::Thread(exit_code, result, map_func);
+        while (!*quit)
+        {
+        }
+    }
+    /*
+        t1.join();
+        *quit = false;
+        t1.join(); */
 }

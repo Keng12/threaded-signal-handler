@@ -2,46 +2,42 @@
 
 namespace sth
 {
-    void sigwait_handler(const sigset_t set, std::shared_ptr<std::atomic_int> result, const std::shared_ptr<std::atomic_bool> quit, std::unordered_map<int, std::function<void()>> map_func)
+    void *Thread::sigwait_handler(void *arguments)
     {
-        while (!(*quit))
+        struct arg_struct *args = static_cast<struct arg_struct *>(arguments);
+        bool quit{};
+        while (!quit)
         {
             int sig{};
-            *result = sigwait(&set, &sig);
-            if (0 == *result)
+            *(args->result) = sigwait(&(args->set), &sig);
+            if (0 == *(args->result))
             {
-                map_func[sig]();
+                if (args->F_w_args)
+                {
+                    std::cout<<"args fun" << std::endl;
+                    args->F_w_args(sig);
+                }
+                else if (args->F)
+                {
+                    std::cout<<"fun" << std::endl;
+                    args->F();
+                }
+                else
+                {
+                    std::cout<<"Map fun" << std::endl;
+                    args->map_F[sig]();
+                }
+            }
+            else
+            {
+                std::cout<<"Fail"<<std::endl;
+                quit = true;
             }
         }
+        pthread_exit(nullptr);
     }
 
-    void sigwait_handler(const sigset_t set, std::shared_ptr<std::atomic_int> result, const std::shared_ptr<std::atomic_bool> quit, std::function<void(int)> sig_func)
-    {
-        while (!(*quit))
-        {
-            int sig{};
-            *result = sigwait(&set, &sig);
-            if (0 == *result)
-            {
-                sig_func(sig);
-            }
-        }
-    }
-
-    void sigwait_handler(const sigset_t set, std::shared_ptr<std::atomic_int> result, const std::shared_ptr<std::atomic_bool> quit, std::function<void()> sig_func)
-    {
-        while (!(*quit))
-        {
-            int sig{};
-            *result = sigwait(&set, &sig);
-            if (0 == *result)
-            {
-                sig_func();
-            }
-        }
-    }
-
-    int init_mask(sigset_t *set_ptr)
+    int Thread::init_mask(sigset_t *set_ptr)
     {
         int result_sig = sigemptyset(set_ptr);
         if (-1 == result_sig)
@@ -51,7 +47,7 @@ namespace sth
         return result_sig;
     }
 
-    int add_sig(sigset_t *set_ptr, const int signal)
+    int Thread::add_sig(sigset_t *set_ptr, const int signal)
     {
         int result_sig = sigaddset(set_ptr, signal);
         if (-1 == result_sig)
@@ -61,34 +57,43 @@ namespace sth
         return result_sig;
     }
 
-    int handle_signal(std::thread &thread, std::shared_ptr<std::atomic_int> result, const std::shared_ptr<std::atomic_bool> quit, std::unordered_map<int, std::function<void()>> map_func)
+    Thread::Thread(int &exit_code, std::shared_ptr<std::atomic_int> result, const std::unordered_map<int, std::function<void()>> & map_func)
+        : mArgs{arg_struct{std::move(result), map_func}}
     {
         sigset_t set{};
-        int exit_code = init_mask(&set);
+        exit_code = init_mask(&set);
         if (0 == exit_code)
         {
             for (const auto &item : map_func)
             {
-                exit_code = add_sig(&set, item.first);
-                if (0 != exit_code)
+                int tmp_exit_code = add_sig(&set, item.first);
+                if (0 != tmp_exit_code)
                 {
-                    return exit_code;
+                    exit_code = tmp_exit_code;
                 }
             }
-            exit_code = pthread_sigmask(SIG_BLOCK, &set, nullptr);
             if (0 == exit_code)
             {
-                auto f = static_cast<void (*)(const sigset_t, std::shared_ptr<std::atomic_int>, const std::shared_ptr<std::atomic_bool>, std::unordered_map<int, std::function<void()>>)>(sigwait_handler);
-                thread = std::thread(f, set, result, quit, map_func);
+                exit_code = pthread_sigmask(SIG_BLOCK, &set, nullptr);
+                if (0 == exit_code)
+                {
+                    mArgs.set = set;
+                    exit_code = pthread_create(&mThread, nullptr, sigwait_handler, static_cast<void *>(&mArgs));
+                    std::cout<<"Thread created"<<std::endl;
+                    if (0 == exit_code)
+                    {
+                        mRunning = true;
+                    }
+                }
             }
         }
-        return exit_code;
     }
 
-    int handle_signal(std::thread &thread, std::shared_ptr<std::atomic_int> result, const std::shared_ptr<std::atomic_bool> quit, int signal, std::function<void()> sig_func)
+    Thread::Thread(int &exit_code, std::shared_ptr<std::atomic_int> result, int signal, std::function<void()> sig_func)
+        : mArgs{arg_struct{std::move(result), std::move(sig_func)}}
     {
         sigset_t set{};
-        int exit_code = init_mask(&set);
+        exit_code = init_mask(&set);
         if (0 == exit_code)
         {
             exit_code = add_sig(&set, signal);
@@ -97,11 +102,23 @@ namespace sth
                 exit_code = pthread_sigmask(SIG_BLOCK, &set, nullptr);
                 if (0 == exit_code)
                 {
-                    auto f = static_cast<void (*)(sigset_t, std::shared_ptr<std::atomic_int>, std::shared_ptr<std::atomic_bool>, std::function<void()>)>(sigwait_handler);
-                    thread = std::thread(f, set, result, quit, sig_func);
+                    mArgs.set = set;
+                    exit_code = pthread_create(&mThread, nullptr, sigwait_handler, static_cast<void *>(&mArgs));
+                    if (0 == exit_code)
+                    {
+                        mRunning = true;
+                    }
                 }
             }
         }
-        return exit_code;
+    }
+
+    Thread::~Thread()
+    {
+        if (mRunning)
+        {
+            pthread_cancel(mThread);
+            pthread_join(mThread, nullptr);
+        }
     }
 }
