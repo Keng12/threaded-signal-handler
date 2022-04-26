@@ -38,7 +38,6 @@ void sighand2(std::shared_ptr<std::atomic_bool> quit)
 
 int main()
 {
-    std::shared_ptr<std::atomic_bool> quit = std::make_shared<std::atomic_bool>();
     std::shared_ptr<std::atomic_int> result = std::make_shared<std::atomic_int>();
     std::array<int, 1> sigarray{};
     sigarray[0] = SIGINT;
