@@ -112,8 +112,11 @@ namespace sth
     {
         if (mRunning)
         {
-            pthread_cancel(mThread);
-            pthread_join(mThread, nullptr);
+            int result = pthread_cancel(mThread);
+            assert(result == 0);
+            result = pthread_join(mThread, nullptr);
+            assert(result == 0);
+
         }
     }
 }
