@@ -46,7 +46,7 @@ int main()
     auto f1 = std::bind(sighand2, quit);
     int exit_code{};
     {
-        sth::Thread t = sth::Thread(exit_code, result, SIGINT, f1);
+        sth::Thread t = sth::Thread(exit_code, nullptr, SIGINT, f1);
         while (!*quit)
         {
         }
@@ -54,7 +54,7 @@ int main()
     *quit = false;
     std::unordered_map<int, std::function<void()>> map_func{{SIGINT, f1}};
     {
-        sth::Thread t = sth::Thread(exit_code, result, map_func);
+        sth::Thread t = sth::Thread(exit_code, nullptr, map_func);
         while (!*quit)
         {
         }

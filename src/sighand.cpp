@@ -6,11 +6,15 @@ namespace sth
     {
         struct arg_struct *args = static_cast<struct arg_struct *>(arguments);
         bool quit{};
-        while (!quit)
+        while (!(*args->thread_quit))
         {
             int sig{};
-            *(args->result) = sigwait(&(args->set), &sig);
-            if (0 == *(args->result))
+            int tmp_result = sigwait(&(args->set), &sig);
+            if (args->result)
+            {
+                *(args->result) = tmp_result;
+            }
+            if (0 == tmp_result)
             {
                 if (args->F_w_args)
                 {
@@ -27,11 +31,10 @@ namespace sth
             }
             else
             {
-                quit = true;
+                *(args->thread_quit) = true;
             }
         }
-        int result = (*(args->result)).load();
-        pthread_exit(&result);
+        pthread_exit(nullptr);
     }
 
     int Thread::init_mask(sigset_t *set_ptr)
@@ -113,7 +116,7 @@ namespace sth
         int exit_code{};
         if (mRunning)
         {
-            if (0 == *(mArgs.result))
+            if (!(*mArgs.thread_quit))
             {
                 exit_code = pthread_cancel(mThread);
             }

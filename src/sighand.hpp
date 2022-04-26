@@ -22,7 +22,8 @@ namespace sth
             const std::function<void()> F{};
             std::unordered_map<int, std::function<void()>> map_F{};
             sigset_t set{};
-            std::shared_ptr<std::atomic_int> result;
+            std::shared_ptr<std::atomic_int> result{};
+            std::shared_ptr<std::atomic_bool> thread_quit = std::make_shared<std::atomic_bool>();
             inline arg_struct() = default;
             inline arg_struct(std::shared_ptr<std::atomic_int> l_result, std::unordered_map<int, std::function<void()>> map_func) : result{std::move(l_result)}, map_F{std::move(map_func)} {};
             inline arg_struct(std::shared_ptr<std::atomic_int> l_result, std::function<void(int)> sig_func) : result{std::move(l_result)}, F_w_args{std::move(sig_func)} {};
