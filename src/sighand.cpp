@@ -116,7 +116,6 @@ namespace sth
             assert(0 == result);
             result = pthread_join(mThread, nullptr);
             assert(0 == result);
-
         }
     }
 }
