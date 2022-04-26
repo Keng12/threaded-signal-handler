@@ -37,7 +37,8 @@ namespace sth
 
     public:
         ~Thread();
-        Thread(int &exit_code, std::shared_ptr<std::atomic_int> result, const std::unordered_map<int, std::function<void()>> & map_func);
+        int join();
+        Thread(int &exit_code, std::shared_ptr<std::atomic_int> result, const std::unordered_map<int, std::function<void()>> &map_func);
         Thread(int &exit_code, std::shared_ptr<std::atomic_int> result, int signal, std::function<void()> sig_func);
         template <size_t n_signal>
         inline Thread(int &exit_code, std::shared_ptr<std::atomic_int> result, std::array<int, n_signal> signal_array, std::function<void(int)> sig_func)

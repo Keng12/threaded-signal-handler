@@ -30,7 +30,8 @@ namespace sth
                 quit = true;
             }
         }
-        pthread_exit(nullptr);
+        int result = (*(args->result)).load();
+        pthread_exit(&result);
     }
 
     int Thread::init_mask(sigset_t *set_ptr)
@@ -53,7 +54,7 @@ namespace sth
         return result_sig;
     }
 
-    Thread::Thread(int &exit_code, std::shared_ptr<std::atomic_int> result, const std::unordered_map<int, std::function<void()>> & map_func)
+    Thread::Thread(int &exit_code, std::shared_ptr<std::atomic_int> result, const std::unordered_map<int, std::function<void()>> &map_func)
         : mArgs{arg_struct{std::move(result), map_func}}
     {
         sigset_t set{};
@@ -107,15 +108,29 @@ namespace sth
             }
         }
     }
+    int Thread::join()
+    {
+        int exit_code{};
+        if (mRunning)
+        {
+            if (0 == *(mArgs.result))
+            {
+                exit_code = pthread_cancel(mThread);
+            }
+            if (0 == exit_code)
+            {
+                exit_code = pthread_join(mThread, nullptr);
+                mRunning = false;
+            }
+        }
+        return exit_code;
+    }
 
     Thread::~Thread()
     {
         if (mRunning)
         {
-            int result = pthread_cancel(mThread);
-            assert(0 == result);
-            result = pthread_join(mThread, nullptr);
-            assert(0 == result);
+            join();
         }
     }
 }
