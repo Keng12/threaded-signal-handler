@@ -43,36 +43,31 @@ int main()
     std::array<int, 1> sigarray{};
     sigarray[0] = SIGINT;
     sigset_t set{};
-    using namespace std::placeholders;
-    auto f1 = std::bind(sighand1, quit, _1);
-    auto f2 = std::bind(sighand2, quit);
-    std::unordered_map<int, std::function<void()>> map_func{{SIGINT, f2}};
-    std::array<int, 1> sig_array{};
-    sig_array[0] = SIGINT;
+    auto f1 = std::bind(sighand2, quit);
     int exit_code{};
     {
-        sth::Thread t = sth::Thread(exit_code, result, SIGINT, f2);
-        while (!*quit)
-        {
-        }
-    }
-    // sth::Thread t = sth::Thread(exit_code, result, map_func);
-    *quit = false;
-    {
-        sth::Thread t = sth::Thread(exit_code, result, sigarray, f1);
+        sth::Thread t = sth::Thread(exit_code, result, SIGINT, f1);
         while (!*quit)
         {
         }
     }
     *quit = false;
+    std::unordered_map<int, std::function<void()>> map_func{{SIGINT, f1}};
     {
         sth::Thread t = sth::Thread(exit_code, result, map_func);
         while (!*quit)
         {
         }
     }
-    /*
-        t1.join();
-        *quit = false;
-        t1.join(); */
+    *quit = false;
+    std::array<int, 1> sig_array{};
+    sig_array[0] = SIGINT;
+    using namespace std::placeholders;
+    auto f2 = std::bind(sighand1, quit, _1);
+    {
+        sth::Thread t = sth::Thread(exit_code, result, sigarray, f2);
+        while (!*quit)
+        {
+        }
+    }
 }

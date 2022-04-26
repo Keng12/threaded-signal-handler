@@ -75,7 +75,6 @@ namespace sth
                 {
                     mArgs.set = set;
                     exit_code = pthread_create(&mThread, nullptr, sigwait_handler, static_cast<void *>(&mArgs));
-                    std::cout<<"Thread created"<<std::endl;
                     if (0 == exit_code)
                     {
                         mRunning = true;
