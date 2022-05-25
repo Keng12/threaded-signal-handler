@@ -7,3 +7,4 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(sth src/main.cpp)
 target_sources(sth PRIVATE src/sighand.cpp)
+target_compile_options(sth PRIVATE -Wall -Wextra -Werror)
