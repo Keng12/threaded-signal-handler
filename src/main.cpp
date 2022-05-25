@@ -42,7 +42,6 @@ int main()
     std::shared_ptr<std::atomic_int> result = std::make_shared<std::atomic_int>();
     std::array<int, 1> sigarray{};
     sigarray[0] = SIGINT;
-    sigset_t set{};
     auto f1 = std::bind(sighand2, quit);
     int exit_code{};
     {

@@ -5,7 +5,6 @@ namespace sth
     void *Thread::sigwait_handler(void *arguments)
     {
         struct arg_struct *args = static_cast<struct arg_struct *>(arguments);
-        bool quit{};
         while (!(*args->thread_quit))
         {
             int sig{};

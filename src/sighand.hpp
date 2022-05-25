@@ -25,9 +25,9 @@ namespace sth
             std::shared_ptr<std::atomic_int> result{};
             std::shared_ptr<std::atomic_bool> thread_quit = std::make_shared<std::atomic_bool>();
             inline arg_struct() = default;
-            inline arg_struct(std::shared_ptr<std::atomic_int> l_result, std::unordered_map<int, std::function<void()>> map_func) : result{std::move(l_result)}, map_F{std::move(map_func)} {};
-            inline arg_struct(std::shared_ptr<std::atomic_int> l_result, std::function<void(int)> sig_func) : result{std::move(l_result)}, F_w_args{std::move(sig_func)} {};
-            inline arg_struct(std::shared_ptr<std::atomic_int> l_result, std::function<void()> sig_func) : result{std::move(l_result)}, F{std::move(sig_func)} {};
+            inline arg_struct(std::shared_ptr<std::atomic_int> l_result, std::unordered_map<int, std::function<void()>> map_func) :  map_F{std::move(map_func)} , result{std::move(l_result)} {};
+            inline arg_struct(std::shared_ptr<std::atomic_int> l_result, std::function<void(int)> sig_func) : F_w_args{std::move(sig_func)}, result{std::move(l_result)} {};
+            inline arg_struct(std::shared_ptr<std::atomic_int> l_result, std::function<void()> sig_func) : F{std::move(sig_func)},result{std::move(l_result)} {};
         };
         static void *sigwait_handler(void *arguments);
         int init_mask(sigset_t *set_ptr);
